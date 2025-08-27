@@ -37,7 +37,8 @@ export default function ACRemote() {
         }),
       {
         loading: 'Sending power command...', // Loading message
-        success: (data) => `Success: ${data.status}`, // Success message with data from the promise
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        success: (data :any) => `Success: ${data.status}`, // Success message with data from the promise
         error: () => `Failed to connect to NodeMCU.`, // Error message
       }
     ).finally(() => {
@@ -68,7 +69,8 @@ export default function ACRemote() {
         }),
       {
         loading: 'Setting temperature...', // Loading message
-        success: (data) => `Success: ${data.status}`, // Success message with data from the promise
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        success: (data: any) => `Success: ${data.status}`, // Success message with data from the promise
         error: () => `Failed to connect to NodeMCU.`, // Error message
       }
     ).finally(() => {
