@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Power, Plus, Minus, Thermometer } from "lucide-react"
+import { Toaster, toast } from "sonner" // Switched from react-hot-toast to sonner
 
 export default function ACRemote() {
   const [isOn, setIsOn] = useState(false)
@@ -13,22 +14,67 @@ export default function ACRemote() {
   const minTemp = 16
   const maxTemp = 30
 
-const NODEMCU_IP = "https://desired-legal-doe.ngrok-free.app"; // replace with your ESP IP
+  const NODEMCU_IP = "https://desired-legal-doe.ngrok-free.app"; // replace with your ngrok URL
 
-const handlePowerToggle = async () => {
-  setIsLoading(true)
-  await fetch(`${NODEMCU_IP}/power`)
-  setIsOn(!isOn)
-  setIsLoading(false)
-}
+  const handlePowerToggle = async () => {
+    setIsLoading(true)
 
-const handleTempChange = async (newTemp: number) => {
-  if (newTemp < minTemp || newTemp > maxTemp) return
-  setIsLoading(true)
-  await fetch(`${NODEMCU_IP}/temp?value=${newTemp}`)
-  setTemperature(newTemp)
-  setIsLoading(false)
-}
+    // Using toast.promise for a cleaner way to handle loading, success, and error states.
+    toast.promise(
+      // The promise to track
+      fetch(`${NODEMCU_IP}/power`)
+        .then(response => {
+          if (!response.ok) {
+            // If the response is not OK, throw an error to trigger the 'error' message
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Update UI state and return the data for the success message
+          setIsOn(!isOn);
+          return data;
+        }),
+      {
+        loading: 'Sending power command...', // Loading message
+        success: (data) => `Success: ${data.status}`, // Success message with data from the promise
+        error: () => `Failed to connect to NodeMCU.`, // Error message
+      }
+    ).finally(() => {
+      setIsLoading(false);
+    });
+  }
+
+  const handleTempChange = async (newTemp: number) => {
+    if (newTemp < minTemp || newTemp > maxTemp) return
+
+    setIsLoading(true)
+
+    // Using toast.promise for a cleaner way to handle loading, success, and error states.
+    toast.promise(
+      // The promise to track
+      fetch(`${NODEMCU_IP}/temp?value=${newTemp}`)
+        .then(response => {
+          if (!response.ok) {
+            // If the response is not OK, throw an error to trigger the 'error' message
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Update UI state and return the data for the success message
+          setTemperature(newTemp);
+          return data;
+        }),
+      {
+        loading: 'Setting temperature...', // Loading message
+        success: (data) => `Success: ${data.status}`, // Success message with data from the promise
+        error: () => `Failed to connect to NodeMCU.`, // Error message
+      }
+    ).finally(() => {
+      setIsLoading(false);
+    });
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 flex items-center justify-center">
@@ -125,6 +171,8 @@ const handleTempChange = async (newTemp: number) => {
           </div>
         </Card>
       </div>
+      {/* Sonner's Toaster component. The richColors prop adds color to the toasts. */}
+      <Toaster richColors />
     </div>
   )
 }
