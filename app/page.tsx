@@ -13,11 +13,11 @@ export default function ACRemote() {
   const minTemp = 16
   const maxTemp = 30
 
-const NODEMCU_IP = "http://192.168.0.125"; // replace with your ESP IP
+const NODEMCU_IP = "https://desired-legal-doe.ngrok-free.app"; // replace with your ESP IP
 
 const handlePowerToggle = async () => {
   setIsLoading(true)
-  await fetch("/api/power");
+  await fetch(`${NODEMCU_IP}/power`)
   setIsOn(!isOn)
   setIsLoading(false)
 }
