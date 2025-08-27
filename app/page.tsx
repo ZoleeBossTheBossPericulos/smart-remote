@@ -17,7 +17,7 @@ const NODEMCU_IP = "http://192.168.0.125"; // replace with your ESP IP
 
 const handlePowerToggle = async () => {
   setIsLoading(true)
-  await fetch(`${NODEMCU_IP}/power`)
+  await fetch("/api/power");
   setIsOn(!isOn)
   setIsLoading(false)
 }
