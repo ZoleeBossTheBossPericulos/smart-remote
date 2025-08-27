@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
@@ -19,30 +20,27 @@ export default function ACRemote() {
   const handlePowerToggle = async () => {
     setIsLoading(true)
 
-    // Using toast.promise for a cleaner way to handle loading, success, and error states.
-    toast.promise(
-      // The promise to track
-      fetch(`${NODEMCU_IP}/power`)
-        .then(response => {
-          if (!response.ok) {
-            // If the response is not OK, throw an error to trigger the 'error' message
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          // Update UI state and return the data for the success message
-          setIsOn(!isOn);
-          return data;
-        }),
-      {
-        loading: 'Sending power command...', // Loading message
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        success: (data :any) => `Success: ${data.status}`, // Success message with data from the promise
-        error: () => `Failed to connect to NodeMCU.`, // Error message
-      }
-    ).finally(() => {
-      setIsLoading(false);
+    // The promise to track, now with the finally block
+    const powerPromise = fetch(`${NODEMCU_IP}/power`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setIsOn(!isOn);
+        return data;
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    // Pass the promise to toast.promise
+    toast.promise(powerPromise, {
+      loading: 'Sending power command...',
+      success: (data: any) => `Success: ${data.status}`,
+      error: () => `Failed to connect to NodeMCU.`,
     });
   }
 
@@ -51,30 +49,27 @@ export default function ACRemote() {
 
     setIsLoading(true)
 
-    // Using toast.promise for a cleaner way to handle loading, success, and error states.
-    toast.promise(
-      // The promise to track
-      fetch(`${NODEMCU_IP}/temp?value=${newTemp}`)
-        .then(response => {
-          if (!response.ok) {
-            // If the response is not OK, throw an error to trigger the 'error' message
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          // Update UI state and return the data for the success message
-          setTemperature(newTemp);
-          return data;
-        }),
-      {
-        loading: 'Setting temperature...', // Loading message
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        success: (data: any) => `Success: ${data.status}`, // Success message with data from the promise
-        error: () => `Failed to connect to NodeMCU.`, // Error message
-      }
-    ).finally(() => {
-      setIsLoading(false);
+    // The promise to track, now with the finally block
+    const tempPromise = fetch(`${NODEMCU_IP}/temp?value=${newTemp}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setTemperature(newTemp);
+        return data;
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    // Pass the promise to toast.promise
+    toast.promise(tempPromise, {
+      loading: 'Setting temperature...',
+      success: (data: any) => `Success: ${data.status}`,
+      error: () => `Failed to connect to NodeMCU.`,
     });
   }
 
